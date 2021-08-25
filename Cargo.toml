@@ -1,0 +1,14 @@
+[package]
+name = "shadergraph"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+# TODO: switch to published crate once successor to glium 0.30.1 is relased
+glium = { git = "https://github.com/glium/glium.git", rev = "710dba0e" }
+image = "0.23"
+notify = "5.0.0-pre.11"
+lexpr = "0.2.6"
+include_dir = "0.6"
+ffmpeg-next = "4.4"
+structopt = "0.3"

@@ -1,0 +1,10 @@
+(let s 1024)
+
+(let mass (shader "mass" s s))
+(let force (shader-rec "grid" s s mass))
+(let planet (shader-rec "wander" s s force))
+
+(let width_x (shader "channel" s s force))
+(let out (shader "add" s s width_x planet))
+
+(output out)

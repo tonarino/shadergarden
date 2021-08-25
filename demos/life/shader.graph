@@ -1,0 +1,2 @@
+(let life (shader-rec "life" 512 512))
+(output life)
