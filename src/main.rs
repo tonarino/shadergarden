@@ -24,10 +24,7 @@ use shadergraph::{
     reload,
     util,
 };
-use structopt::{
-    clap::AppSettings,
-    StructOpt,
-};
+use structopt::StructOpt;
 
 /// Waits a specific number of nanoseconds before rendering
 /// the next frame. Returns a control_flow that should be
@@ -58,19 +55,42 @@ pub fn dir(path: &OsStr) -> PathBuf {
     }
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Shader Graph", about, global_settings(&[AppSettings::ColoredHelp, AppSettings::DeriveDisplayOrder]))]
-struct Cli {
-    #[structopt(short, long)]
-    shader_dir: PathBuf,
-    #[structopt(short, long)]
-    config:     PathBuf,
-    #[structopt(short, long, default_value = "512")]
-    width:      u32,
-    #[structopt(short, long, default_value = "512")]
-    height:     u32,
-    inputs:     Vec<PathBuf>,
+pub fn package_dir(path: &OsStr) -> PathBuf {
+    if path == "." {
+        std::env::current_dir().expect("Can not determine package directory")
+    } else {
+        PathBuf::from(path)
+    }
 }
+
+// #[derive(StructOpt, Debug)]
+// struct New {
+//     #[structopt(default_value = ".", parse(from_os_str =
+// package_dir))]     project: PathBuf,
+// }
+
+#[derive(StructOpt, Debug)]
+struct Cli {
+    #[structopt(default_value = ".", parse(from_os_str = package_dir))]
+    project: PathBuf,
+    #[structopt(short, long)]
+    graph:   Option<PathBuf>,
+    #[structopt(short, long, default_value = "512")]
+    width:   u32,
+    #[structopt(short, long, default_value = "512")]
+    height:  u32,
+    #[structopt(short, long)]
+    inputs:  Vec<PathBuf>,
+}
+
+// #[derive(StructOpt, Debug)]
+// #[structopt(name = "Shader Graph", bin_name =
+// "shadergraph", about,
+// global_settings(&[AppSettings::ColoredHelp,
+// AppSettings::DeriveDisplayOrder]))] enum Cli {
+//     New(New),
+//     Run(Run),
+// }
 
 /// Main function
 /// Runs the shader graph, and displays the output in the
@@ -79,7 +99,11 @@ struct Cli {
 fn main() {
     // parse arguments and extract
     let args = Cli::from_args();
-    let lisp_config = args.config;
+
+    let lisp_config = args
+        .graph
+        .to_owned()
+        .unwrap_or_else(|| args.project.join("shader.graph"));
     let inputs = args.inputs;
 
     // set up the main event loop
@@ -92,7 +116,7 @@ fn main() {
     // set up hot code reloading
     let mut watcher = reload::ShaderGraphWatcher::new_watch_dir(
         display.get_context(),
-        args.shader_dir,
+        args.project,
         lisp_config,
     )
     .map_err(|e| {
@@ -106,7 +130,10 @@ fn main() {
     // build a table of textures
     let mut input_textures = vec![];
     for texture_path in inputs {
-        eprintln!("[info] Building frames for {}", texture_path.to_string_lossy());
+        eprintln!(
+            "[info] Building frames for {}",
+            texture_path.to_string_lossy()
+        );
         input_textures.push(
             FrameStream::new(
                 &texture_path,
@@ -133,7 +160,7 @@ fn main() {
             reload::WatchResult::Err(e) => {
                 eprintln!("[warn] Could not rebuild graph:");
                 eprintln!("{}", e);
-            },
+            }
         }
 
         // get the input and output handles

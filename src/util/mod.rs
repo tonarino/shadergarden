@@ -138,11 +138,6 @@ pub fn compile_shader(
     context: &Rc<Context>,
     source: &str,
 ) -> Result<Program, String> {
-    Program::from_source(
-        context,
-        include_str!("./texture.vert"),
-        source,
-        None,
-    )
-    .map_err(|e| format!("{}", e))
+    Program::from_source(context, include_str!("./texture.vert"), source, None)
+        .map_err(|e| format!("{}", e))
 }

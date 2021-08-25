@@ -3,11 +3,11 @@ use std::collections::BTreeMap;
 use lexpr::Value;
 
 use crate::{
-    lisp::Val,
     graph::{
         NodeId,
         ShaderGraph,
     },
+    lisp::Val,
 };
 
 pub type FnDef = (Vec<String>, Vec<Value>);

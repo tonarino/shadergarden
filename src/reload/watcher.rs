@@ -25,10 +25,10 @@ use notify::{
 };
 
 use crate::{
+    graph::ShaderGraph,
     lisp::graph_from_sexp,
     map,
     reload::ShaderDir,
-    graph::ShaderGraph,
 };
 
 /// A struct that watches a directory for changes,

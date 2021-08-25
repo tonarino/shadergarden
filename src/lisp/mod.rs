@@ -4,11 +4,11 @@ use glium::backend::Context;
 use lexpr::Value;
 
 use crate::{
-    reload::ShaderDir,
     graph::{
         NodeId,
         ShaderGraph,
     },
+    reload::ShaderDir,
 };
 
 mod env;
@@ -331,15 +331,20 @@ fn builtin(name: &str, args: &[Val]) -> Option<Result<Val, String>> {
             let iter = n.into_iter();
             Val::Number(iter.reduce(|a, b| a / b).unwrap_or(1.0))
         },
-        _ => { return None; },
+        _ => {
+            return None;
+        },
     };
 
-    let numbers = args.iter()
+    let numbers = args
+        .iter()
         .map(|v| v.to_float())
         .collect::<Result<Vec<f64>, _>>();
 
     let numbers = match numbers {
-        Err(e) => { return Some(Err(e)); },
+        Err(e) => {
+            return Some(Err(e));
+        },
         Ok(ok) => ok,
     };
 

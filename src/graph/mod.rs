@@ -16,10 +16,10 @@ use crate::util::{
     RectStrip,
 };
 
-mod uniform;
-mod shader_node;
 mod compute_node;
 mod node;
+mod shader_node;
+mod uniform;
 
 pub use compute_node::{
     ComputeNode,
