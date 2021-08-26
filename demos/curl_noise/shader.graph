@@ -1,0 +1,3 @@
+;(let curl_noise (shader-rec "curl_noise" 1024 1024))
+(let simplex_noise (shader-rec "simplex_noise" 1024 1024))
+(output simplex_noise)
