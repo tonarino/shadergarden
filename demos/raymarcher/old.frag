@@ -13,9 +13,9 @@ uniform float u_time;
 
 // CONSTANTS ----------
 
-#define START 1.0
+#define START 0.0
 #define END 1000.0
-#define STEPS 70
+#define STEPS 100
 #define EPSILON 0.001
 #define FOV 90.0
 
@@ -33,7 +33,7 @@ float sphere(vec3 point, float radius) {
 }
 
 float scene (vec3 point) {
-    point = mod(point, 8.0) - 2.0;
+    point = mod(point + 4.0, 8.0) - 4.0;
     float cube = box(point, vec3(2.0));
     float sphere = sphere(point, sqrt(2.0));
     return max(cube, sphere);
@@ -46,19 +46,21 @@ vec3 march(vec3 camera, vec3 ray) {
     float depth = START;
     float minDistance = END;
     float steps = 0.0;
-    for (float steps = 0.0; steps < float(STEPS); steps++) {
+
+    for (steps = 0.0; steps < float(STEPS); steps++) {
         float dist = scene(camera + depth * ray);
         minDistance = min(minDistance, dist);
         depth += dist;
 
         if (dist < EPSILON) {
-            return vec3(depth, minDistance, steps);
+            return vec3(depth, minDistance, steps - 1.0 + (dist / EPSILON));
         }
 
         if (depth > END) {
             return vec3(END, minDistance, steps);
         }
     }
+
     return vec3(depth, minDistance, STEPS);
 }
 
@@ -99,7 +101,7 @@ void main() {
     st.x *= u_resolution.x/u_resolution.y;
 
     vec3 ray = makeRay(FOV, u_resolution.x/u_resolution.y, st);
-    vec3 camera = vec3(sin(u_time), 0.2, cos(u_time)) * 5.0;
+    vec3 camera = vec3(sin(u_time * 0.1), 0.4, cos(u_time * 0.1)) * 5.0;
 
     mat3 view = look(camera, vec3(0.), vec3(0.0, 1.0, 0.0));
     vec3 dir = view * ray;
@@ -110,8 +112,12 @@ void main() {
     float steps = marchResults.z;
 
     vec3 color = vec3(1.0);
-    vec3 point = camera + depth * dir;
-    color = (normal(point) + vec3(1.0)) / 2.0;
+    float normals = dot(normalize(vec3(1.0)), normal(camera + depth * dir));
+    // float occ = 1.0 - ((steps + (random(st) * 2.0 - 1.0)) / float(STEPS));
+    // float keyLight = float(smoothstep((normals.x + normals.y) / 2.0 + 0.5, 0.4, 0.6) * 0.5 + 0.5);
+    // color = vec3(pow(occ, 2.0) * keyLight);
 
-    gl_FragColor = vec4(color * 1.0 - (steps / float(STEPS)), 1.0);
+    gl_FragColor = vec4(vec3(normals), 1.0);
+
+    // gl_FragColor = vec4(color * 1.0 - (steps / float(STEPS)), 1.0);
 }
