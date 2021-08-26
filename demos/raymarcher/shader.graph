@@ -1,0 +1,2 @@
+(let frame (shader "old" 640 480))
+(output frame)
