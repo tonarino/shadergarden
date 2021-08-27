@@ -1,2 +1,3 @@
-(let frame (shader "old" (* 640 2) (* 480 2)))
-(output frame)
+(let frame (shader     "render" (* 640 2) (* 480 2)))
+(let avg   (shader-rec "avg"    (* 640 2) (* 480 2) frame))
+(output avg)
