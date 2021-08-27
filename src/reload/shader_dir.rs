@@ -16,15 +16,21 @@ pub struct ShaderDir {
 
 impl ShaderDir {
     /// Creates a new `ShaderDir` from component parts.
-    pub fn new(lisp_graph: String, shaders: BTreeMap<String, String>) -> ShaderDir {
-        ShaderDir { lisp: lisp_graph, shaders }
+    pub fn new(
+        lisp_graph: String,
+        shaders: BTreeMap<String, String>,
+    ) -> ShaderDir {
+        ShaderDir {
+            lisp: lisp_graph,
+            shaders,
+        }
     }
 
     // TODO: abstract and combine following new methods
 
-    /// Creates a `ShaderDir` from a directory included at compile time.
-    /// Note that `lisp_graph` must be a parsable lisp expression,
-    /// not a path.
+    /// Creates a `ShaderDir` from a directory included at
+    /// compile time. Note that `lisp_graph` must be a
+    /// parsable lisp expression, not a path.
     pub fn new_from_included(
         dir: Dir,
         lisp_graph: String,
@@ -50,7 +56,10 @@ impl ShaderDir {
             shaders.insert(name, contents);
         }
 
-        Ok(ShaderDir { lisp: lisp_graph, shaders })
+        Ok(ShaderDir {
+            lisp: lisp_graph,
+            shaders,
+        })
     }
 
     /// Creates a new `ShaderDir` from a directory.
