@@ -44,9 +44,9 @@ pub struct NodeId(usize);
 /// Each shader is run sequentially, and can be the input to
 /// shaders later down the line.
 pub struct ShaderGraph {
-    context:    Rc<Context>,
-    rect_strip: RectStrip,
-    created:    std::time::Instant,
+    context:     Rc<Context>,
+    rect_strip:  RectStrip,
+    pub created: std::time::Instant,
 
     /// None is an input node.
     nodes: Vec<Option<Box<dyn Node>>>,

@@ -8,3 +8,4 @@ pub mod lisp;
 pub mod map;
 pub mod reload;
 pub mod util;
+pub mod png;

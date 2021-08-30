@@ -1,4 +1,7 @@
-use std::rc::Rc;
+use std::{
+    path::PathBuf,
+    rc::Rc,
+};
 
 use glium::{
     backend::{
@@ -29,6 +32,8 @@ use glium::{
     Texture2d,
     VertexBuffer,
 };
+
+use crate::input::FrameStream;
 
 #[derive(Copy, Clone)]
 pub struct Vertex {
@@ -140,4 +145,25 @@ pub fn compile_shader(
 ) -> Result<Program, String> {
     Program::from_source(context, include_str!("./texture.vert"), source, None)
         .map_err(|e| format!("{}", e))
+}
+
+pub fn input_textures(
+    display: &Display,
+    inputs: &[PathBuf],
+    width: u32,
+    height: u32,
+) -> Vec<FrameStream> {
+    // build a table of textures
+    let mut input_textures = vec![];
+    for texture_path in inputs {
+        eprintln!(
+            "[info] Building frames for {}",
+            texture_path.to_string_lossy()
+        );
+        input_textures.push(
+            FrameStream::new(&texture_path, width, height, display)
+                .expect("Couldn't open frame source"),
+        );
+    }
+    return input_textures;
 }
