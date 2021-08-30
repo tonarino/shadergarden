@@ -1,0 +1,4 @@
+(let curl_noise (shader-rec "curl_noise" 512 512))
+;(let move (shader-rec "move" 512 512 curl_noise))
+;(let simplex_noise (shader-rec "simplex_noise" 512 512))
+(output curl_noise)
