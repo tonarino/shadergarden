@@ -107,7 +107,7 @@ struct Render {
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Shader Graph", bin_name = "shadergraph", about, global_settings(&[AppSettings::ColoredHelp, AppSettings::DeriveDisplayOrder]))]
 enum Cli {
-    New(New),
+    // New(New),
     Run(Run),
     Render(Render),
 }
@@ -123,7 +123,7 @@ fn main() {
     match args {
         Cli::Run(r) => run(r),
         Cli::Render(r) => render(r),
-        Cli::New(n) => panic!("Auto-creating a new template project is a WIP"),
+        // Cli::New(n) => panic!("Auto-creating a new template project is a WIP"),
     }
 }
 
