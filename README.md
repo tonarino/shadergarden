@@ -1,4 +1,4 @@
-# *`shadergraph`*
+# `shadergraph`
 
 Shadergraph is a tool for building hot-code-reloadable shader pipelines. For a tutorial for how to get started, consult the [introductory blog post](https://blog.tonari.no/shadergraph) or the [shadergraph lisp language documentation](./lisp.md).
 
