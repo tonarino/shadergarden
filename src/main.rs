@@ -209,13 +209,13 @@ fn render(render: Render) {
 
         if frame_number >= frame_start {
             png::write_png(texture, &frames_output.join(
-                format!("frame-{}.png", frame_number)
+                format!("frame-{:0>4}.png", frame_number - frame_start)
             ));
-            frame_number += 1
         }
         if frame_number > frame_end {
             panic!("Finished render, bailing pathetically");
         }
+        frame_number += 1
     });
 }
 

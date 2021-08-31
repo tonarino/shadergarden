@@ -1,2 +1,3 @@
 (let life (shader-rec "life" 512 512))
-(output life)
+(let color (shader-rec "color" 512 512 life))
+(output color)
