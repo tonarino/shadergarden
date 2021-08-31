@@ -100,7 +100,7 @@ struct Render {
     /// Ending frame
     #[structopt(short, long, default_value = "150")]
     end:    u64,
-    #[structopt(default_value = "30")]
+    #[structopt(long, default_value = "30")]
     fps:    f64,
 }
 

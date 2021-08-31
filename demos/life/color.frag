@@ -13,6 +13,6 @@ uniform float u_time;
 void main() {
     vec3 c = texture(u_texture, coords, 0.).rgb;
     vec3 p = texture(u_previous, coords, 0.).rgb;
-    p *= vec3(0.98, 0.97, 0.99);
+    p *= vec3(0.97, 0.99, 0.98);
     color = vec4(max(c, p), 1.);
 }

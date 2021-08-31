@@ -44,12 +44,10 @@ float random (vec2 st) {
 
 void main() {
     if (u_time < 1.0) {
-        color = vec4(vec3(mod(coords.x * u_resolution.x, 2.0) > 0.5), 1.0);
-        if (random(coords + u_time) > 0.999) {
-            color *= -1.0;
+        color = vec4(vec3(0.), 1.);
+        if (coords.x < 0.5 && coords.y < 0.5) {
+            color = vec4(1.);
         }
-
-        // color += vec4(vec3(random(coords + u_time) > coords.y), 1.);
         return;
     }
 

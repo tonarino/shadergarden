@@ -14,9 +14,9 @@ void main() {
     p = p*2.-1.;
     float a = sim(vec2(p.r, p.g), vec2(p.b, p.a));
     vec2 d = vec2(p.r, p.g) + vec2(p.b, p.a);
-    // d = normalize(d);
+    d = normalize(d);
     d = d * 0.5 + 0.5;
-    color = vec4(vec3(a), 1.0) * 2.0;
-    color *= vec4(d, 0.5, 1.0);
-    color = sqrt(color);
+    // color = vec4(vec3(a), 1.0) * 2.0;
+    color = vec4(d, 0.5, 1.0);
+    // color = sqrt(color);
 }

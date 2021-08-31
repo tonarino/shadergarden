@@ -1,3 +1,10 @@
-(let frame (shader     "render" (* 640 2) (* 480 2)))
-(let avg   (shader-rec "avg"    (* 640 2) (* 480 2) frame))
-(output avg)
+(let w (* 640 2))
+(let h (* 480 2))
+(let frame  (shader     "render"  w h))
+(let avg    (shader-rec "avg"     w h frame))
+(let scaled (shader     "scale"   w h avg))
+(let edges  (shader     "sobel"   w h scaled))
+(let crisp scaled)
+(repeat 100
+    (let crisp  (shader "denoise" w h edges crisp)))
+(output crisp)

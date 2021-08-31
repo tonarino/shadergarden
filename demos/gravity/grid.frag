@@ -74,8 +74,8 @@ vec4 update(vec2 p) {
     }
 
     return vec4(
-        force      / (tot_s  + 0.004),
-        force_back / (tot_sb + 0.004));
+        force      / (tot_s  + 0.008),
+        force_back / (tot_sb + 0.008));
 }
 
 float rand(vec2 co){

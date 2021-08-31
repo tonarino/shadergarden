@@ -42,7 +42,7 @@ pub fn write_png(texture: &Texture2d, path: &Path) {
 
     let sink: Vec<Vec<(u8, u8, u8, u8)>> = texture.read();
 
-    for (y, row) in sink.iter().enumerate() {
+    for (y, row) in sink.iter().rev().enumerate() {
         for (x, pixel) in row.iter().enumerate() {
             buffer.put_pixel(
                 x as u32,

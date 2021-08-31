@@ -17,15 +17,6 @@ vec4 lerp(vec4 a, vec4 b, float t) {
 }
 
 void main() {
-    if (u_time < 0.5) {
-        color = vec4(
-            random(coords),
-            random(coords + u_time * 2.0),
-            random(coords + u_time * 3.0),
-            random(coords + u_time * 4.0));
-        return;
-    }
-
     color = lerp(
         texture(u_previous,  coords, 0.),
         texture(u_texture_0, coords, 0.),
