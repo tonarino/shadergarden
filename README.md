@@ -22,8 +22,18 @@ If a build error is encountered while reloading, `shadergraph` will log the erro
 ### Fancier Usage
 You can pass input images and videos to shadergraph using the `-i` flag. This flag takes a list of paths to photos/videos - you must pass the same number of input photos/videos as the number of `(input ...)`s specified in `shader.graph`.
 
-Happy hacking!
+Once you've got a nice shadergraph, to render out a png sequence, use the `render` subcommand. This subcommand works exactly the same as `run`, but requires an output directory. To render the game of life demo out into a gif, run:
 
 ```
-cargo run --release -- render demos/life -o out -s 30 -e 415
+mkdir out
+shadergraph render demos/life -o out -s 30 -e 430
+ffmpeg -i "out/frame-%4d.png" -framerate 30 life.gif
 ```
+
+You should see something like this (it might be a *little* fancier):
+
+<p align="center">
+    <img src="./demos/life/life.gif">
+</p>
+
+Happy hacking!

@@ -1,3 +1,5 @@
 (let life (shader-rec "life" 512 512))
 (let color (shader-rec "color" 512 512 life))
+; for classic game of life
+; change `color` to `life` below:
 (output color)
