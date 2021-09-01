@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest] # , macOS-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
 
@@ -26,6 +26,14 @@ jobs:
 
 #     - name: Formatting
 #       run: cargo fmt --all -- --check
+
+    - name: Update Linux Repositories
+      run: sudo apt-get update
+      if: ${{ runner.os == 'Linux' }}
+
+    - name: Install Linux Dependencies
+      run: sudo apt-get install -y libavutil-dev
+      if: ${{ runner.os == 'Linux' }}
 
     - name: Build the Binary
       run: cargo build --release
