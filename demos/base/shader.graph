@@ -1,0 +1,2 @@
+(let rainbow (shader "shader" 512 512))
+(output rainbow)
