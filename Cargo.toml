@@ -2,6 +2,13 @@
 name = "shadergraph"
 version = "0.1.0"
 edition = "2018"
+authors = ["Isaac Clayton <slightknack@gmail.com>"]
+description = "Create evolving artistic images with hot-code-reloaded Lisp and GLSL."
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/tonarino/shadergraph"
+homepage = "https://blog.tonari.no/shadergraph"
+keywords = ["shader", "glsl", "lisp", "reload", "shdergraph", "compiler"]
 
 [dependencies]
 # TODO: switch to published crate once successor to glium 0.30.1 is relased
