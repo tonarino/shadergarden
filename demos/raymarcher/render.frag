@@ -1,3 +1,7 @@
+#version 140
+
+out vec4 out_color;
+
 // METADATA ----------
 
 uniform vec2 u_resolution;
@@ -51,7 +55,7 @@ float scene(vec3 point) {
     float c3 = box(point - vec3(0.0,-10.0, 0.0), vec3(10.0));
     float c4 = box(point - vec3(0.0, 0.0, 10.0), vec3(10.0));
     float c5 = box(point - vec3(0.0, 0.0,-10.0), vec3(10.0));
-    float box = min(c5, min(min(c1, c2), min(c3, c4)));
+    float scene_box = min(c5, min(min(c1, c2), min(c3, c4)));
 
     mat3 t = look(vec3(1.0, 0., 0.5), vec3(0., 0., 0.), vec3(0.0, 1.0, 0.0));
     float box1 = box((point + vec3(2., 2., 2.)) * t, vec3(3.0, 6.0, 3.0));
@@ -60,7 +64,7 @@ float scene(vec3 point) {
     float box_u = min(box1, box2);
 
     float circle = sphere(point + vec3(-1., 0.0, -1.3), 2.0);
-    return min(min(box, circle), box_u);
+    return min(min(scene_box, circle), box_u);
 }
 
 vec4 emission(vec3 point) {
@@ -194,7 +198,7 @@ void main() {
     // float keyLight = float(smoothstep((normals.x + normals.y) / 2.0 + 0.5, 0.4, 0.6) * 0.5 + 0.5);
     // color = vec3(pow(occ, 2.0) * keyLight);
 
-    gl_FragColor = vec4(color, 1.0);
+    out_color = vec4(color, 1.0);
 
     // gl_FragColor = vec4(color * 1.0 - (steps / float(STEPS)), 1.0);
 }
