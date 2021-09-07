@@ -9,7 +9,13 @@ Once you've installed shadergraph via `cargo install shadergraph`, test to see t
 shadergraph --help
 ```
 
-This should print out some usage information. To run a shadergraph, if you're currently in the same directory as a standard shadergraph project, run:
+This should print out some usage information. To create a new project, run:
+
+```
+shadergraph new path/to/project
+```
+
+This will create a new example project in the specified directory. To run a shadergraph, cd into the directory of a project and run:
 
 ```
 shadergraph run

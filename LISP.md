@@ -336,6 +336,7 @@ Here's a quick reference for common uniforms and stuff.
 
 ### Uniforms
 - Textures: `u_texture_<N>` is the Nth texture passed into the shader. It is a `uniform sampler2D`.
+- Previous: `u_previous` is the output of the previous frame in recurrent shaders.
 - Time: `u_time` is the time, in seconds, since the shader last started running. it is a `uniform float`
 - Resolution: `u_resolution` is the output resolution size, in pixels. This is a `uniform vec2`.
 
