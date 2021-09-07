@@ -1,6 +1,7 @@
 use std::{
     collections::BTreeMap,
     ffi::OsStr,
+    fs,
     path::PathBuf,
     time::{
         Duration,
@@ -107,7 +108,7 @@ struct Render {
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Shader Graph", bin_name = "shadergraph", about, global_settings(&[AppSettings::ColoredHelp, AppSettings::DeriveDisplayOrder]))]
 enum Cli {
-    // New(New),
+    New(New),
     Run(Run),
     Render(Render),
 }
@@ -123,8 +124,28 @@ fn main() {
     match args {
         Cli::Run(r) => run(r),
         Cli::Render(r) => render(r),
-        // Cli::New(n) => panic!("Auto-creating a new template project is a WIP"),
+        Cli::New(n) => new(n.project),
     }
+}
+
+fn new(path: PathBuf) {
+    fs::create_dir_all(&path).unwrap();
+    if let Ok(mut dir) = fs::read_dir(&path) {
+        if dir.next().is_some() {
+            eprintln!("[fatal] Specified project path is not empty");
+            panic!();
+        }
+    }
+
+    if reload::BASE_PROJECT.extract(&path).is_err() {
+        eprintln!("[fatal] Could not create base project");
+        panic!();
+    }
+
+    eprintln!(
+        "[info] successfully created new project in `{}`",
+        path.display()
+    );
 }
 
 // TODO: factor out common parts of render and run
@@ -139,7 +160,7 @@ fn render(render: Render) {
 
     // set up the main event loop
     let (event_loop, display) = util::create(
-        "Shader Graph Playground".to_string(),
+        "Shader Graph Renderer".to_string(),
         args.width as f64,
         args.height as f64,
     );

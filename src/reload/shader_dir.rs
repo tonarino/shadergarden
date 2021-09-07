@@ -5,7 +5,12 @@ use std::{
     path::Path,
 };
 
-use include_dir::Dir;
+use include_dir::{
+    include_dir,
+    Dir,
+};
+
+pub const BASE_PROJECT: Dir = include_dir!("./demos/base");
 
 /// Represents a directory of shaders, and a shader graph
 /// lisp configuration file.
