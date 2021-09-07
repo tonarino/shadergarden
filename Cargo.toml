@@ -8,7 +8,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/tonarino/shadergraph"
 homepage = "https://blog.tonari.no/shadergraph"
-keywords = ["shader", "glsl", "lisp", "reload", "shdergraph", "compiler"]
+keywords = ["shader", "glsl", "lisp", "reload", "shdergraph"]
 
 [dependencies]
 glium = "0.30.2"
