@@ -106,7 +106,7 @@ struct Render {
 }
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "Shader Graph", bin_name = "shadergraph", about, global_settings(&[AppSettings::ColoredHelp, AppSettings::DeriveDisplayOrder]))]
+#[structopt(name = "Shader Garden", bin_name = "shadergarden", about, global_settings(&[AppSettings::ColoredHelp, AppSettings::DeriveDisplayOrder]))]
 enum Cli {
     New(New),
     Run(Run),
@@ -160,7 +160,7 @@ fn render(render: Render) {
 
     // set up the main event loop
     let (event_loop, display) = util::create(
-        "Shader Graph Renderer".to_string(),
+        "Shader Garden Renderer".to_string(),
         args.width as f64,
         args.height as f64,
     );
@@ -249,7 +249,7 @@ fn run(args: Run) {
 
     // set up the main event loop
     let (event_loop, display) = util::create(
-        "Shader Graph Playground".to_string(),
+        "Shader Garden Playground".to_string(),
         args.width as f64,
         args.height as f64,
     );

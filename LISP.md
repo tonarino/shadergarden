@@ -1,4 +1,4 @@
-# A Brief Introduction to shadergraph Lisp
+# A Brief Introduction to Shader Garden Lisp
 A `ShaderGraph` defines a directed graph of computation. The easiest way to create one for general use is through a small lispy configuration language. This language isn't Turing complete as it's meant for configuration - in this sense, the graph doesn't do any computation itself, it just *describes* how computation should be done.
 
 ## Getting Started
@@ -12,7 +12,7 @@ Let's look at a really basic example:
 This shader graph has a single node called `texture`. All it does is immediately return the input texture. This isn't very exciting, but it works. To evaluate this shader graph from Rust, you need to hook it up to a glium context:
 
 ```rust
-use shadergraph::{map, program::{graph_from_sexp, load_shaders}};
+use shadergarden::{map, program::{graph_from_sexp, load_shaders}};
 
 // Create the graph within a context
 let context = /* create a glium context */;
@@ -37,7 +37,7 @@ A shader graph is made of `Node`s, and can have multiple inputs and outputs. Bec
 ## Using a Shader
 Now that we know how to set everything up, let's write something a bit more complex - a shader that combines multiple textures!
 
-Shader Graph use GLSL as its shading language. It's not too hard to pick up, but if you'd like to learn more before continuing I highly recommend you read through [The Book of Shaders](https://thebookofshaders.com/) and [Inigo Quilez's Website](https://iquilezles.org/). A shader is a program that runs a simple function on each pixel in parallel to produce an output.
+Shader Garden use GLSL as its shading language. It's not too hard to pick up, but if you'd like to learn more before continuing I highly recommend you read through [The Book of Shaders](https://thebookofshaders.com/) and [Inigo Quilez's Website](https://iquilezles.org/). A shader is a program that runs a simple function on each pixel in parallel to produce an output.
 
 A shader receives inputs through *uniforms*, which can be things like time, vectors, or even textures. By convention, we use the `u_` prefix to denote uniforms.
 
@@ -184,7 +184,7 @@ Functions can only return one argument, which is a bit of a limitation at the mo
 >
 > It's important to note that this wouldn't introduce any additional overhead. These programs define a shader graph, and two exactly-the-same shader graphs, even if defined in different ways, will run with exactly the same performance.
 
-Finally, we'll cover some of Shader Graph Lisp's more advanced features.
+Finally, we'll cover some of Shader Garden Lisp's more advanced features.
 
 ## Advanced Features
 When writing GLSL shaders, it's common to use `#define` statements to define useful constants. For instance:
@@ -201,7 +201,7 @@ Loops in GLSL are unrolled at compile time, which means they must have a fixed n
 
 But what if you have a shader that can applied in a lot of different situations, with each situation requiring slightly different constants? For example, what if we want to `SEARCH` to be smaller at high resolutions (so we do less work), or what if we want to search *backwards* by starting at `SEARCH` and decrementing `i` in other situations?
 
-It may sound a bit crazy, but Shader Graph Lisp comes equipped has a *preprocessor preprocessor*. Like `#define`, this *pre-preprocessor* inserts useful constants at compiletime for later use. Unlike `#define`, however, these constants can be passed in through Shader Graph Lisp.
+It may sound a bit crazy, but Shader Garden Lisp comes equipped has a *preprocessor preprocessor*. Like `#define`, this *pre-preprocessor* inserts useful constants at compiletime for later use. Unlike `#define`, however, these constants can be passed in through Shader Garden Lisp.
 
 Here's a simple example:
 
@@ -323,7 +323,7 @@ In this sense, hot code reloading and ease of prototyping go hand-in-hand; the f
 
 To try out hot code reloading, `cd` into `resource` and type `cargo run --release` (using `prime-run` if you have a GPU and don't want your computer to die.) This will load the shader graph specified in `shader.graph`, and begin executing it if no issues exist.
 
-When you save after editing a shader, or the graph itself, `shadergraph` should detect your changes and recompile everything. If compilation succeeds, it'll switch out the old graph with the new; otherwise, it'll print the error and keep running the old one.
+When you save after editing a shader, or the graph itself, `shadergarden` should detect your changes and recompile everything. If compilation succeeds, it'll switch out the old graph with the new; otherwise, it'll print the error and keep running the old one.
 
 Happy hacking!
 
