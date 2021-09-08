@@ -1491,8 +1491,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d1f72836d2aa753853178eda473a3b9d8e4eefdaf20523b919677e6de489f8f1"
 
 [[package]]
-name = "shadergraph"
-version = "0.1.0"
+name = "shadergarden"
+version = "0.2.0"
 dependencies = [
  "ffmpeg-next",
  "glium",

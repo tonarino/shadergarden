@@ -20,7 +20,7 @@ use glium::{
     },
     Surface,
 };
-use shadergraph::{
+use shadergarden::{
     lisp,
     map,
     png,

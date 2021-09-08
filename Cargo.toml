@@ -1,14 +1,14 @@
 [package]
-name = "shadergraph"
-version = "0.1.0"
+name = "shadergarden"
+version = "0.2.0"
 edition = "2018"
 authors = ["Isaac Clayton <slightknack@gmail.com>"]
-description = "Create evolving artistic images with hot-code-reloaded Lisp and GLSL."
+description = "Create evolving gardens of shaders with Lisp and GLSL."
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/tonarino/shadergraph"
-homepage = "https://blog.tonari.no/shadergraph"
-keywords = ["shader", "glsl", "lisp", "reload", "shdergraph"]
+repository = "https://github.com/tonarino/shadergarden"
+homepage = "https://blog.tonari.no/shadergarden"
+keywords = ["shader", "glsl", "lisp", "reload", "garden"]
 
 [dependencies]
 glium = "0.30.2"
