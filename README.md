@@ -1,6 +1,6 @@
 # `shadergarden`
 
-Shadergraph is a tool for building hot-code-reloadable shader pipelines. For a tutorial for how to get started, consult the [introductory blog post](https://blog.tonari.no/shadergarden) or the [shadergarden lisp language documentation](./LISP.md).
+Shadergarden is a tool for building hot-code-reloadable shader pipelines. For a tutorial for how to get started, consult the [introductory blog post](https://blog.tonari.no/shadergarden) or the [shadergarden lisp language documentation](./LISP.md).
 
 ## Usage
 Once you've installed shadergarden via `cargo install shadergarden`, test to see that it is installed properly by running:
