@@ -180,8 +180,12 @@ fn render(render: Render) {
     eprintln!("[info] Built initial graph");
 
     // build a table of textures
+    #[cfg(feature = "ffmpeg")]
     let mut input_textures =
         util::input_textures(&display, &inputs, args.width, args.height);
+
+    #[cfg(not(feature = "ffmpeg"))]
+    assert!(inputs.is_empty(), "Inputs are not supported when running without ffmpeg");
 
     eprintln!("[info] Starting Render...");
 
@@ -204,6 +208,11 @@ fn render(render: Render) {
             eprintln!("[fatal] Graph has invalid output signature.");
             panic!();
         };
+
+        #[cfg(not(feature = "ffmpeg"))]
+        assert!(input_nodes.is_empty());
+
+        #[cfg(feature = "ffmpeg")]
         assert_eq!(
             input_nodes.len(),
             input_textures.len(),
@@ -212,6 +221,8 @@ fn render(render: Render) {
 
         // render the shader graph, display the primary output
         let mut input_map = BTreeMap::new();
+
+        #[cfg(feature = "ffmpeg")]
         for (node_id, texture) in input_nodes.iter().zip(input_textures.iter_mut()) {
             input_map.insert(*node_id, texture.next_frame());
         }
@@ -269,8 +280,12 @@ fn run(args: Run) {
     eprintln!("[info] Built initial graph");
 
     // build a table of textures
+    #[cfg(feature = "ffmpeg")]
     let mut input_textures =
         util::input_textures(&display, &inputs, args.width, args.height);
+
+    #[cfg(not(feature = "ffmpeg"))]
+    assert!(inputs.is_empty(), "Inputs are not supported when running without ffmpeg");
 
     eprintln!("[info] Starting...");
 
@@ -298,6 +313,11 @@ fn run(args: Run) {
             eprintln!("[fatal] Graph has invalid output signature.");
             panic!();
         };
+
+        #[cfg(not(feature = "ffmpeg"))]
+        assert!(input_nodes.is_empty());
+
+        #[cfg(feature = "ffmpeg")]
         assert_eq!(
             input_nodes.len(),
             input_textures.len(),
@@ -306,9 +326,12 @@ fn run(args: Run) {
 
         // render the shader graph, display the primary output
         let mut input_map = BTreeMap::new();
+
+        #[cfg(feature = "ffmpeg")]
         for (node_id, texture) in input_nodes.iter().zip(input_textures.iter_mut()) {
             input_map.insert(*node_id, texture.next_frame());
         }
+
         let output_map = graph.forward(input_map);
 
         // set up the draw target and draw
