@@ -20,5 +20,5 @@ image = "0.23"
 notify = "5.0.0-pre.12"
 lexpr = "0.2.6"
 include_dir = "0.6"
-ffmpeg-next = "4.4"
+ffmpeg-next = { version = "4.4", optional = true }
 structopt = "0.3"
