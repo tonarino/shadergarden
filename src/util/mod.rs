@@ -33,6 +33,7 @@ use glium::{
     VertexBuffer,
 };
 
+#[cfg(feature = "ffmpeg")]
 use crate::input::FrameStream;
 
 #[derive(Copy, Clone)]
@@ -147,6 +148,7 @@ pub fn compile_shader(
         .map_err(|e| format!("{}", e))
 }
 
+#[cfg(feature = "ffmpeg")]
 pub fn input_textures(
     display: &Display,
     inputs: &[PathBuf],
