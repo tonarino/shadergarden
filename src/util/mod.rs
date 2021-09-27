@@ -1,7 +1,6 @@
-use std::{
-    path::PathBuf,
-    rc::Rc,
-};
+#[cfg(feature = "ffmpeg")]
+use std::path::PathBuf;
+use std::rc::Rc;
 
 use glium::{
     backend::{
@@ -54,11 +53,11 @@ impl RectStrip {
     /// used to render basically everything.
     pub fn new<F: ?Sized + Facade>(facade: &F) -> RectStrip {
         let mut shape = vec![];
-        for a in [0.0, 1.0] {
-            for b in [0.0, 1.0] {
+        for a in &[0.0, 1.0] {
+            for b in &[0.0, 1.0] {
                 shape.push(Vertex {
                     position:   [a * 2. - 1., b * 2. - 1.],
-                    tex_coords: [a, b],
+                    tex_coords: [*a, *b],
                 });
             }
         }

@@ -220,6 +220,7 @@ fn render(render: Render) {
         );
 
         // render the shader graph, display the primary output
+        #[allow(unused_mut)]
         let mut input_map = BTreeMap::new();
 
         #[cfg(feature = "ffmpeg")]
@@ -325,6 +326,7 @@ fn run(args: Run) {
         );
 
         // render the shader graph, display the primary output
+        #[allow(unused_mut)]
         let mut input_map = BTreeMap::new();
 
         #[cfg(feature = "ffmpeg")]
