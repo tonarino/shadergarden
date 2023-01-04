@@ -231,6 +231,16 @@ fn node(
             )?;
             Ok(Val::Node(node_id))
         },
+        "shader-inline" => {
+            let (src, width, height, inputs) = shader(graph, env, iter)?;
+            let node_id = graph.add_shader(
+                &src,
+                inputs,
+                width as u32,
+                height as u32,
+            )?;
+            Ok(Val::Node(node_id))
+        },
         "shader-param" => {
             // get the shader we'll be running the transformations
             // against
@@ -256,6 +266,16 @@ fn node(
             let (name, width, height, inputs) = shader(graph, env, iter)?;
             let node_id = graph.add_rec_shader(
                 env.shader(&name)?,
+                inputs,
+                width as u32,
+                height as u32,
+            )?;
+            Ok(Val::Node(node_id))
+        },
+        "shader-rec-inline" => {
+            let (src, width, height, inputs) = shader(graph, env, iter)?;
+            let node_id = graph.add_rec_shader(
+                &src,
                 inputs,
                 width as u32,
                 height as u32,
