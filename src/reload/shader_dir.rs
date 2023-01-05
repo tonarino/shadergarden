@@ -2,6 +2,7 @@ use std::{
     collections::BTreeMap,
     ffi::OsStr,
     fs,
+    io,
     path::Path,
 };
 
@@ -72,12 +73,19 @@ impl ShaderDir {
     where
         T: AsRef<Path>,
     {
-        let lisp = fs::read_to_string(&config).map_err(|_| {
-            format!(
-                "Could not read `{}` in shader directory",
-                config.as_ref().to_str().unwrap()
-            )
-        })?;
+        let lisp = 
+            if config.as_ref().to_str().unwrap() == "-" {
+                io::read_to_string(io::stdin()).map_err(|_| {
+                    "Could not read config in stdin"
+                })?
+            } else {
+                fs::read_to_string(&config).map_err(|_| {
+                    format!(
+                        "Could not read `{}` in shader directory",
+                        config.as_ref().to_str().unwrap()
+                    )
+                })?
+            };
 
         let mut shaders = BTreeMap::new();
         let files = fs::read_dir(path)
