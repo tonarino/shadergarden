@@ -92,7 +92,7 @@ impl ShaderGraphWatcher {
                     thread::spawn(move || {
                         for sig in s.forever() {
                             changed.store(true, Ordering::SeqCst);
-                            println!("Received signal {:?}", sig);
+                            println!("[info] Received signal {:?}", sig);
                         }
                     });
                 }
