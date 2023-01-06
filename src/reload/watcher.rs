@@ -26,6 +26,7 @@ use notify::{
     Watcher,
 };
 
+#[cfg(target_family = "unix")]
 use signal_hook::{consts::SIGUSR1, iterator::Signals};
 
 use crate::{
@@ -85,19 +86,22 @@ impl ShaderGraphWatcher {
         .unwrap();
         watcher.watch(&path, RecursiveMode::Recursive).unwrap();
 
-        let signals = Signals::new(&[SIGUSR1]);
-        match signals {
-            Ok(mut s) => {
-                    let changed = changed.clone();
-                    thread::spawn(move || {
-                        for sig in s.forever() {
-                            changed.store(true, Ordering::SeqCst);
-                            println!("[info] Received signal {:?}", sig);
-                        }
-                    });
-                }
-            Err(e) => println!("[warn] Signal listen error: `{:?}`.", e)
-        };
+        #[cfg(target_family = "unix")]
+        {
+            let signals = Signals::new(&[SIGUSR1]);
+            match signals {
+                Ok(mut s) => {
+                        let changed = changed.clone();
+                        thread::spawn(move || {
+                            for sig in s.forever() {
+                                changed.store(true, Ordering::SeqCst);
+                                println!("[info] Received signal {:?}", sig);
+                            }
+                        });
+                    }
+                Err(e) => println!("[warn] Signal listen error: `{:?}`.", e)
+            };
+        }
 
         let shader_graph = ShaderGraphWatcher::build(context, &path, &config)?;
         let last_reload = Instant::now();
