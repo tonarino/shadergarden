@@ -74,16 +74,18 @@ impl ShaderDir {
     where
         T: AsRef<Path>,
     {
+        let config_str = config.as_ref().to_str().unwrap();
+
         let lisp = //custom stdin s-expression consuming function here 
-            if config.as_ref().to_str().unwrap() == "-" {
+            if config_str == "-" {
                 read_stdin_config().map_err(|s| {
-                    format!("Could not read config in stdin: {}", s)
+                    format!("Could not read config from stdin: {}", s)
                 })?
             } else {
                 fs::read_to_string(&config).map_err(|_| {
                     format!(
                         "Could not read `{}` in shader directory",
-                        config.as_ref().to_str().unwrap()
+                        config_str
                     )
                 })?
             };
@@ -124,7 +126,7 @@ fn read_stdin_config() -> Result<String, String> {
     {
         let mut handle = stdin.lock();
 
-        let mut count = 0;
+        let mut count = 0; //the number of open parentheses with no corresponding closing
         let mut start = 0;
 
         //consume ONE s-expression
@@ -143,12 +145,13 @@ fn read_stdin_config() -> Result<String, String> {
                 Err(err) => return Err(format!("Reading STDIN error: {}", err)),
             };
 
+            //subtract 1 since we reached a closing parenthesis
             count -= 1;
 
             if count < 0 {
                 return Err("Unbound s-expression error".to_string());
             } else if count > 0 {
-                continue;
+                continue; //s-expression not finished
             } else {
                 //check if s-expression is an output one
                 if did_read_output_sexpr(&byte_vec, start) {
