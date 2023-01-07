@@ -21,11 +21,10 @@ use glium::{
     Surface,
 };
 use shadergarden::{
-    lisp,
-    map,
     png,
     reload,
     util,
+    reload::watcher::ShaderGraphWatcher
 };
 use structopt::{
     clap::AppSettings,
@@ -166,16 +165,7 @@ fn render(render: Render) {
     );
 
     // set up hot code reloading
-    let shader_dir = reload::ShaderDir::new_from_dir(args.project, lisp_config)
-        .expect("Could not load initial shader directory");
-    let mut graph =
-        lisp::graph_from_sexp(display.get_context(), shader_dir, map! {})
-            .map_err(|e| {
-                eprintln!("[fatal] Could not build initial graph:");
-                eprintln!("{}", e);
-                panic!();
-            })
-            .unwrap();
+    let mut graph = ShaderGraphWatcher::build_initial(display.get_context(), &args.project, &lisp_config).unwrap();
 
     eprintln!("[info] Built initial graph");
 

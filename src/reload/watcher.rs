@@ -20,6 +20,7 @@ use std::{
     sync::mpsc,
     io,
     io::BufRead,
+    fs,
 };
 
 use glium::backend::Context;
@@ -92,7 +93,29 @@ impl ShaderGraphWatcher {
         .unwrap();
         watcher.watch(&path, RecursiveMode::Recursive).unwrap();
 
-        // stdin reading thread
+        // SIGUSR handling thread
+        #[cfg(target_family = "unix")]
+        {
+            let signals = Signals::new(&[SIGUSR1]);
+            match signals {
+                Ok(mut s) => {
+                        let changed = changed.clone();
+                        thread::spawn(move || {
+                            for sig in s.forever() {
+                                changed.store(true, Ordering::SeqCst);
+                                println!("[info] Received signal {:?}", sig);
+                            }
+                        });
+                    }
+                Err(e) => println!("[warn] Signal listen error: `{:?}`.", e)
+            };
+        }
+        
+        //initial build
+        let shader_graph = ShaderGraphWatcher::build_initial(context, &path, &config)?;
+        let last_reload = Instant::now();
+
+        // STDIN reading thread
         let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
         {
             // let thread_tx = tx.clone();
@@ -113,27 +136,6 @@ impl ShaderGraphWatcher {
             });
         }
 
-        // SIGUSR handling thread
-        #[cfg(target_family = "unix")]
-        {
-            let signals = Signals::new(&[SIGUSR1]);
-            match signals {
-                Ok(mut s) => {
-                        let changed = changed.clone();
-                        thread::spawn(move || {
-                            for sig in s.forever() {
-                                changed.store(true, Ordering::SeqCst);
-                                println!("[info] Received signal {:?}", sig);
-                            }
-                        });
-                    }
-                Err(e) => println!("[warn] Signal listen error: `{:?}`.", e)
-            };
-        }
-
-        let shader_graph = ShaderGraphWatcher::build(context, &path, &config)?;
-        let last_reload = Instant::now();
-
         Ok(ShaderGraphWatcher {
             context: context.clone(),
             last_reload,
@@ -146,12 +148,50 @@ impl ShaderGraphWatcher {
         })
     }
 
-    fn build(
+    // TO-DO: reduce some code duplication here (build => build_initial AND build_reload)
+    pub fn build_initial(
         context: &Rc<Context>,
         path: &Path,
         config: &Path,
     ) -> Result<ShaderGraph, String> {
-        let shader_dir = ShaderDir::new_from_dir(path, config)?;
+        let shader_dir = match config.to_str().unwrap() {
+            "-" => 
+                ShaderDir::new_from_dir(path, || {
+                    read_stdin_config().map_err(|s| {
+                        format!("Could not read config from stdin: {}", s)
+                    })
+                })?,
+            cfg => 
+                ShaderDir::new_from_dir(path, || {
+                    fs::read_to_string(&config).map_err(|_| {
+                        format!("Could not read `{}` in shader directory", cfg)
+                    })
+                })?,
+        };
+        let shader_graph = graph_from_sexp(context, shader_dir, map! {})?;
+        Ok(shader_graph)
+    }
+
+    fn build(
+        context: &Rc<Context>,
+        path: &Path,
+        config: &Path,
+        rx: &Receiver<String>,
+    ) -> Result<ShaderGraph, String> {
+        let shader_dir = match config.to_str().unwrap() {
+            "-" => 
+                ShaderDir::new_from_dir(path, || {
+                    rx.recv().map_err(|s| {
+                        format!("Could not read config from stdin: {}", s)
+                    })
+                })?,
+            cfg => 
+                ShaderDir::new_from_dir(path, || {
+                    fs::read_to_string(&config).map_err(|_| {
+                        format!("Could not read `{}` in shader directory", cfg)
+                    })
+                })?,
+        };
         let shader_graph = graph_from_sexp(context, shader_dir, map! {})?;
         Ok(shader_graph)
     }
@@ -173,6 +213,7 @@ impl ShaderGraphWatcher {
             &self.context,
             &self.path,
             &self.config,
+            &self._stdin_rx,
         ) {
             Ok(graph) => {
                 self.shader_graph = graph;

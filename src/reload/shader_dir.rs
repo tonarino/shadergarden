@@ -3,7 +3,6 @@ use std::{
     ffi::OsStr,
     fs,
     path::Path,
-
 };
 
 use include_dir::{
@@ -69,26 +68,12 @@ impl ShaderDir {
     }
 
     /// Creates a new `ShaderDir` from a directory.
-    pub fn new_from_dir<T>(path: T, config: T) -> Result<ShaderDir, String>
+    pub fn new_from_dir<T>(path: T, get_lisp : impl Fn() -> Result<String, String>) -> Result<ShaderDir, String>
     where
         T: AsRef<Path>,
     {
-        let config_str = config.as_ref().to_str().unwrap();
 
-        let lisp = //custom stdin s-expression consuming function here 
-            if config_str == "-" {
-                // read_stdin_config().map_err(|s| {
-                //     format!("Could not read config from stdin: {}", s)
-                // })?
-                return Err("Debug".to_string());
-            } else {
-                fs::read_to_string(&config).map_err(|_| {
-                    format!(
-                        "Could not read `{}` in shader directory",
-                        config_str
-                    )
-                })?
-            };
+        let lisp = get_lisp()?;
 
         let mut shaders = BTreeMap::new();
         let files = fs::read_dir(path)
