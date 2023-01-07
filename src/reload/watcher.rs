@@ -16,6 +16,10 @@ use std::{
         Instant,
     },
     thread,
+    sync::mpsc::{Sender, Receiver},
+    sync::mpsc,
+    io,
+    io::BufRead,
 };
 
 use glium::backend::Context;
@@ -47,6 +51,7 @@ pub struct ShaderGraphWatcher {
     changed:      Arc<AtomicBool>,
     _watcher:     RecommendedWatcher,
     shader_graph: ShaderGraph,
+    _stdin_rx:     Receiver<String>
 }
 
 pub enum WatchResult {
@@ -75,6 +80,7 @@ impl ShaderGraphWatcher {
         let config = config.as_ref().to_path_buf();
 
         let changed = Arc::new(AtomicBool::new(false));
+
         // build the watcher
         let mut watcher = RecommendedWatcher::new({
             let changed = changed.clone();
@@ -86,6 +92,28 @@ impl ShaderGraphWatcher {
         .unwrap();
         watcher.watch(&path, RecursiveMode::Recursive).unwrap();
 
+        // stdin reading thread
+        let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
+        {
+            // let thread_tx = tx.clone();
+            let changed = changed.clone();
+            thread::spawn(move || {
+                loop {
+                    println!("[info] Reading config from STDIN");
+                    let maybe_config = read_stdin_config();
+                    match maybe_config {
+                        Ok(c)  => {
+                            println!("[info] STDIN config received, sending to receiver");
+                            tx.send(c).unwrap();
+                            changed.store(true, Ordering::SeqCst);
+                        },
+                        Err(e) => println!("[warn] STDIN config read error: `{:?}`.", e),
+                    }
+                }
+            });
+        }
+
+        // SIGUSR handling thread
         #[cfg(target_family = "unix")]
         {
             let signals = Signals::new(&[SIGUSR1]);
@@ -114,6 +142,7 @@ impl ShaderGraphWatcher {
             changed,
             _watcher: watcher,
             shader_graph,
+            _stdin_rx: rx
         })
     }
 
@@ -169,5 +198,86 @@ impl ShaderGraphWatcher {
         } else {
             (self.graph_no_reload(), WatchResult::NoChange)
         }
+    }
+}
+
+fn read_stdin_config() -> Result<String, String> {
+    let mut byte_vec: Vec<u8> = Vec::new();
+    let stdin = io::stdin(); // We get `Stdin` here.
+    
+    {
+        let mut handle = stdin.lock();
+
+        let mut count = 0; //the number of open parentheses with no corresponding closing
+        let mut start = 0;
+
+        //consume ONE s-expression
+        loop {
+            let bytes_read = handle.read_until(b')', &mut byte_vec);
+            match bytes_read {
+                Ok(read) => {
+                    //count the number of opening parenthesis in read bytes
+                    let len = byte_vec.len();
+                    for i in len-read..len {
+                        if b'(' == byte_vec[i] {
+                            count += 1;
+                        }
+                    };                 
+                },
+                Err(err) => return Err(format!("Reading STDIN error: {}", err)),
+            };
+
+            //subtract 1 since we reached a closing parenthesis
+            count -= 1;
+
+            if count < 0 {
+                return Err("Unbound s-expression error".to_string());
+            } else if count > 0 {
+                continue; //s-expression not finished
+            } else {
+                //check if s-expression is an output one
+                if did_read_output_sexpr(&byte_vec, start) {
+                    break;
+                } else {
+                    start = byte_vec.len() - 1;
+                }
+            }
+        } 
+    }
+
+    //All s-expressions read, convert to string
+    let is_valid_utf8 = std::str::from_utf8(&byte_vec);
+    match is_valid_utf8 {
+        Ok(the_str) => Ok(the_str.to_string()),
+        Err(err) => Err(format!("Parsing STDIN utf8 error: {}", err)),
+    }
+}
+
+fn did_read_output_sexpr(bytes : &Vec<u8>, start : usize) -> bool {
+    let mut i = start;
+
+    //skip everything before initial '('
+    while bytes[i] != b'(' {
+        i += 1;
+    }
+
+    //skip '('
+    i += 1;
+
+    //find index past initial '(' and past all whitespace
+    while (bytes[i] as char).is_whitespace() {
+        i += 1;
+    }
+
+    //check if the rest of the bytes Vec has enough space for 'output', if not, false
+    if bytes.len() - i < 6 {
+        return false;
+    }
+    
+    //convert slice to str and use equality comparison
+    let maybe_str = std::str::from_utf8(&bytes[i..i+6]);
+    match maybe_str {
+        Ok(s)  => s == "output",
+        Err(_) => false, 
     }
 }

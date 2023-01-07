@@ -2,9 +2,8 @@ use std::{
     collections::BTreeMap,
     ffi::OsStr,
     fs,
-    io,
     path::Path,
-    io::BufRead,
+
 };
 
 use include_dir::{
@@ -78,9 +77,10 @@ impl ShaderDir {
 
         let lisp = //custom stdin s-expression consuming function here 
             if config_str == "-" {
-                read_stdin_config().map_err(|s| {
-                    format!("Could not read config from stdin: {}", s)
-                })?
+                // read_stdin_config().map_err(|s| {
+                //     format!("Could not read config from stdin: {}", s)
+                // })?
+                return Err("Debug".to_string());
             } else {
                 fs::read_to_string(&config).map_err(|_| {
                     format!(
@@ -116,86 +116,5 @@ impl ShaderDir {
         }
 
         Ok(ShaderDir { lisp, shaders })
-    }
-}
-
-fn read_stdin_config() -> Result<String, String> {
-    let mut byte_vec: Vec<u8> = Vec::new();
-    let stdin = io::stdin(); // We get `Stdin` here.
-    
-    {
-        let mut handle = stdin.lock();
-
-        let mut count = 0; //the number of open parentheses with no corresponding closing
-        let mut start = 0;
-
-        //consume ONE s-expression
-        loop {
-            let bytes_read = handle.read_until(b')', &mut byte_vec);
-            match bytes_read {
-                Ok(read) => {
-                    //count the number of opening parenthesis in read bytes
-                    let len = byte_vec.len();
-                    for i in len-read..len {
-                        if b'(' == byte_vec[i] {
-                            count += 1;
-                        }
-                    };                 
-                },
-                Err(err) => return Err(format!("Reading STDIN error: {}", err)),
-            };
-
-            //subtract 1 since we reached a closing parenthesis
-            count -= 1;
-
-            if count < 0 {
-                return Err("Unbound s-expression error".to_string());
-            } else if count > 0 {
-                continue; //s-expression not finished
-            } else {
-                //check if s-expression is an output one
-                if did_read_output_sexpr(&byte_vec, start) {
-                    break;
-                } else {
-                    start = byte_vec.len() - 1;
-                }
-            }
-        } 
-    }
-
-    //All s-expressions read, convert to string
-    let is_valid_utf8 = std::str::from_utf8(&byte_vec);
-    match is_valid_utf8 {
-        Ok(the_str) => Ok(the_str.to_string()),
-        Err(err) => Err(format!("Parsing STDIN utf8 error: {}", err)),
-    }
-}
-
-fn did_read_output_sexpr(bytes : &Vec<u8>, start : usize) -> bool {
-    let mut i = start;
-
-    //skip everything before initial '('
-    while bytes[i] != b'(' {
-        i += 1;
-    }
-
-    //skip '('
-    i += 1;
-
-    //find index past initial '(' and past all whitespace
-    while (bytes[i] as char).is_whitespace() {
-        i += 1;
-    }
-
-    //check if the rest of the bytes Vec has enough space for 'output', if not, false
-    if bytes.len() - i < 6 {
-        return false;
-    }
-    
-    //convert slice to str and use equality comparison
-    let maybe_str = std::str::from_utf8(&bytes[i..i+6]);
-    match maybe_str {
-        Ok(s)  => s == "output",
-        Err(_) => false, 
     }
 }
