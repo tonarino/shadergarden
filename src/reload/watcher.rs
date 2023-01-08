@@ -52,7 +52,7 @@ pub struct ShaderGraphWatcher {
     changed:      Arc<AtomicBool>,
     _watcher:     RecommendedWatcher,
     shader_graph: ShaderGraph,
-    _stdin_rx:     Receiver<String>
+    stdin_rx:    Option<Receiver<String>>
 }
 
 pub enum WatchResult {
@@ -116,25 +116,34 @@ impl ShaderGraphWatcher {
         let last_reload = Instant::now();
 
         // STDIN reading thread
-        let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
-        {
-            // let thread_tx = tx.clone();
-            let changed = changed.clone();
-            thread::spawn(move || {
-                loop {
-                    println!("[info] Reading config from STDIN");
-                    let maybe_config = read_stdin_config();
-                    match maybe_config {
-                        Ok(c)  => {
-                            println!("[info] STDIN config received, sending to receiver");
-                            tx.send(c).unwrap();
-                            changed.store(true, Ordering::SeqCst);
-                        },
-                        Err(e) => println!("[warn] STDIN config read error: `{:?}`.", e),
-                    }
+        let stdin_rx = match config.to_str().unwrap() {
+            "-" => {
+                let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
+                {
+                    // let thread_tx = tx.clone();
+                    let changed = changed.clone();
+                    thread::spawn(move || {
+                        loop {
+                            println!("[info] Reading config from STDIN");
+                            let maybe_config = read_stdin_config();
+                            match maybe_config {
+                                Ok(c) => {
+                                    println!("[info] STDIN config received, sending to receiver");
+                                    tx.send(c).unwrap();
+                                    changed.store(true, Ordering::SeqCst);
+                                },
+                                Err(e) => {
+                                    println!("[warn] STDIN config read error: `{:?}`.", e);
+                                    return;
+                                },
+                            }
+                        }
+                    });
                 }
-            });
-        }
+                Some(rx)
+            },
+            _  => None,
+        };
 
         Ok(ShaderGraphWatcher {
             context: context.clone(),
@@ -144,11 +153,12 @@ impl ShaderGraphWatcher {
             changed,
             _watcher: watcher,
             shader_graph,
-            _stdin_rx: rx
+            stdin_rx: stdin_rx
         })
     }
 
     // TO-DO: reduce some code duplication here (build => build_initial AND build_reload)
+    //Refactor with helper methods, maybe in a separate file.
     pub fn build_initial(
         context: &Rc<Context>,
         path: &Path,
@@ -172,23 +182,25 @@ impl ShaderGraphWatcher {
         Ok(shader_graph)
     }
 
-    fn build(
+    fn build_reload(
         context: &Rc<Context>,
         path: &Path,
         config: &Path,
-        rx: &Receiver<String>,
+        stdin_rx: &Option<Receiver<String>>,
     ) -> Result<ShaderGraph, String> {
-        let shader_dir = match config.to_str().unwrap() {
-            "-" => 
+        let shader_dir = match stdin_rx {
+            Some(rx) => 
                 ShaderDir::new_from_dir(path, || {
                     rx.recv().map_err(|s| {
                         format!("Could not read config from stdin: {}", s)
                     })
                 })?,
-            cfg => 
+            None => 
                 ShaderDir::new_from_dir(path, || {
                     fs::read_to_string(&config).map_err(|_| {
-                        format!("Could not read `{}` in shader directory", cfg)
+                        format!("Could not read `{}` in shader directory", 
+                            config.to_str().unwrap()
+                        )
                     })
                 })?,
         };
@@ -209,11 +221,11 @@ impl ShaderGraphWatcher {
     /// loop! As with `graph_no_reload`, only use this
     /// for fine-grained control over reloads.
     pub fn graph_force_reload(&mut self) -> (&mut ShaderGraph, WatchResult) {
-        let watch_result = match ShaderGraphWatcher::build(
+        let watch_result = match ShaderGraphWatcher::build_reload(
             &self.context,
             &self.path,
             &self.config,
-            &self._stdin_rx,
+            &self.stdin_rx,
         ) {
             Ok(graph) => {
                 self.shader_graph = graph;
@@ -256,6 +268,7 @@ fn read_stdin_config() -> Result<String, String> {
         loop {
             let bytes_read = handle.read_until(b')', &mut byte_vec);
             match bytes_read {
+                Ok(0) => return Err("Nothing read error (STDIN closed?)".to_string()),
                 Ok(read) => {
                     //count the number of opening parenthesis in read bytes
                     let len = byte_vec.len();
