@@ -68,16 +68,12 @@ impl ShaderDir {
     }
 
     /// Creates a new `ShaderDir` from a directory.
-    pub fn new_from_dir<T>(path: T, config: T) -> Result<ShaderDir, String>
+    pub fn new_from_dir<T>(path: T, get_lisp : impl Fn() -> Result<String, String>) -> Result<ShaderDir, String>
     where
         T: AsRef<Path>,
     {
-        let lisp = fs::read_to_string(&config).map_err(|_| {
-            format!(
-                "Could not read `{}` in shader directory",
-                config.as_ref().to_str().unwrap()
-            )
-        })?;
+
+        let lisp = get_lisp()?;
 
         let mut shaders = BTreeMap::new();
         let files = fs::read_dir(path)
