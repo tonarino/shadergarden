@@ -268,9 +268,16 @@ fn read_stdin_config() -> Result<String, String> {
         loop {
             let bytes_read = handle.read_until(b')', &mut byte_vec);
             match bytes_read {
-                Ok(0) => return Err("Nothing read error (STDIN closed?)".to_string()),
+                Ok(0) => {
+                    return Err("No bytes were read (STDIN closed?)".to_string());
+                },
+                Ok(_) if *byte_vec.last().unwrap() != b')' => {
+                    return Err("Last byte read not ')' (STDIN closed?)".to_string());
+                },
                 Ok(read) => {
                     //count the number of opening parenthesis in read bytes
+                    // println!("Number of bytes read: {}", read);
+                    // println!("Last byte read: {}", *(byte_vec.last().unwrap()) as char);
                     let len = byte_vec.len();
                     for i in len-read..len {
                         if b'(' == byte_vec[i] {
@@ -278,7 +285,9 @@ fn read_stdin_config() -> Result<String, String> {
                         }
                     };                 
                 },
-                Err(err) => return Err(format!("Reading STDIN error: {}", err)),
+                Err(err) => {
+                    return Err(format!("Reading STDIN error: {}", err));
+                },
             };
 
             //subtract 1 since we reached a closing parenthesis
